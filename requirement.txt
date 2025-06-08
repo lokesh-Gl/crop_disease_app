@@ -1,6 +1,10 @@
 streamlit
 torch
 torchvision
-Pillow
 numpy
+pillow
+opencv-python
+scikit-learn
+tensorflow
+keras
 googletrans==4.0.0-rc1
