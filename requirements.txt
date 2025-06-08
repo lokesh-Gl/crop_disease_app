@@ -1,7 +1,7 @@
 streamlit
-torch==2.7.0
-torchvision==0.17.1
-Pillow
-matplotlib
+torch==2.2.1
+torchvision
 numpy
+pandas
 opencv-python
+Pillow
