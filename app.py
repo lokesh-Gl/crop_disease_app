@@ -134,28 +134,32 @@ def main():
             img = Image.open(image_file).convert("RGB")
 
     if img:
-        img = img.convert("RGB")  
-        st.image(img, caption=translate_text("Uploaded Image", lang_code), use_container_width=True)
+    img = img.convert("RGB")  # Ensure compatibility
+    
+    st.image(img, caption=translate_text("Uploaded Image", lang_code), use_container_width=True)
 
-        img_np = np.array(img)
-        img_pil = Image.fromarray(img_np)
+    # Convert image to NumPy array safely
+    img_np = np.array(img, dtype=np.uint8)
 
-        transform = transforms.Compose([
-            transforms.Resize((128, 128)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-        ])
+    # Convert back to PIL Image before transformations
+    img_pil = Image.fromarray(img_np)
 
-        input_tensor = transform(img_pil).unsqueeze(0)
+    transform = transforms.Compose([
+        transforms.Resize((128, 128)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+    ])
 
-        with torch.no_grad():
-            output = model(input_tensor)
-            pred_class = torch.argmax(output, dim=1).item()
-            class_names = list(disease_map.keys())
-            predicted_label = disease_map.get(class_names[pred_class], "Unknown Disease")
+    input_tensor = transform(img_pil).unsqueeze(0)  # Apply transformations
 
-        st.success(translate_text(f"🩺 Predicted Disease: {predicted_label}", lang_code))
-        st.info(translate_text(f"Treatment Advice: {advice_map.get(predicted_label, 'No specific advice available.')}", lang_code))
+    with torch.no_grad():
+        output = model(input_tensor)
+        pred_class = torch.argmax(output, dim=1).item()
+        class_names = list(disease_map.keys())
+        predicted_label = disease_map.get(class_names[pred_class], "Unknown Disease")
+
+    st.success(translate_text(f"🩺 Predicted Disease: {predicted_label}", lang_code))
+    st.info(translate_text(f"Treatment Advice: {advice_map.get(predicted_label, 'No specific advice available.')}", lang_code))
 
 if __name__ == "__main__":
     main()
