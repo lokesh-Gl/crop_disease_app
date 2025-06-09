@@ -171,15 +171,18 @@ else:
         img = Image.open(image_file).convert("RGB")
 
 if img:
+    # Ensure image is in RGB format
+    img = Image.open(img).convert('RGB')
+
     st.image(img, caption=translate_text("Uploaded Image", lang_code), use_column_width=True)
 
     transform = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
-        transforms.Normalize([0.5], [0.5])
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # For RGB images
     ])
     input_tensor = transform(img).unsqueeze(0)
-
+    
     with torch.no_grad():
         output = model(input_tensor)
         pred_class = torch.argmax(output, dim=1).item()
