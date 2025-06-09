@@ -171,15 +171,18 @@ else:
         img = Image.open(image_file).convert("RGB")
 
 if img:
-    # Ensure image is in RGB format
-    img = Image.open(img).convert('RGB')
+    
+    if not isinstance(img, Image.Image):
+        img = Image.open(img)
 
-    st.image(img, caption=translate_text("Uploaded Image", lang_code), use_column_width=True)
+    img = img.convert('RGB')  
+
+    st.image(img, caption=translate_text("Uploaded Image", lang_code), use_container_width=True)
 
     transform = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # For RGB images
+        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
     ])
     input_tensor = transform(img).unsqueeze(0)
     
