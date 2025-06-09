@@ -36,7 +36,7 @@ class CropDiseaseCNN(nn.Module):
         x = self.classifier(x)
         return x
 
-#  -->  Multilingual Translation  <--
+# --> Multilingual Translation <--
 
 translator = Translator()
 
@@ -46,7 +46,7 @@ def translate_text(text, dest):
     except:
         return text
 
-#  --> Disease Name Mapping and Advice <--
+# --> Disease Name Mapping and Advice <--
 
 disease_map = {
     "Apple___Apple_scab": "Apple Scab",
@@ -90,34 +90,10 @@ disease_map = {
     "Tomato___Tomato_Leaf_Curl_Virus": "Tomato Leaf Curl Virus"
 }
 
-advice_map = {
+advice_map = {  
     "Apple Scab": "Apply fungicides like captan or myclobutanil early in the season. Remove fallen leaves and infected fruits.",
-    "Apple Black Rot": "Prune infected branches and apply fungicides. Remove mummified fruits from the tree.",
-    "Apple Cedar Rust": "Remove nearby juniper plants. Apply fungicides during the early growing season.",
-    "Cherry Powdery Mildew": "Apply sulfur-based fungicide. Improve airflow by proper pruning.",
     "Corn Gray Leaf Spot": "Use resistant varieties and apply fungicide like Azoxystrobin when disease appears.",
-    "Corn Common Rust": "Apply fungicides such as mancozeb or propiconazole. Remove affected leaves.",
-    "Corn Northern Leaf Blight": "Use disease-resistant hybrids and apply fungicides early in the season.",
-    "Grape Black Rot": "Remove infected leaves and apply fungicide like captan or mancozeb at early bloom.",
-    "Grape Esca (Black Measles)": "Prune and remove infected vines. There's no effective chemical control; maintain vine vigor.",
-    "Grape Leaf Blight (Isariopsis Leaf Spot)": "Apply protective fungicides and remove infected leaves and debris.",
-    "Citrus Greening (Huanglongbing)": "Remove infected trees. Control psyllid vectors using insecticides.",
-    "Peach Bacterial Spot": "Apply copper-based bactericides. Use resistant cultivars and avoid overhead irrigation.",
-    "Bell Pepper Bacterial Spot": "Spray copper fungicides. Use pathogen-free seeds and rotate crops.",
-    "Potato Early Blight": "Apply fungicides like chlorothalonil and rotate crops annually.",
-    "Potato Late Blight": "Use fungicides like metalaxyl and destroy infected plant material.",
-    "Squash Powdery Mildew": "Apply fungicides like sulfur or potassium bicarbonate. Ensure good airflow.",
-    "Strawberry Leaf Scorch": "Use resistant cultivars and apply fungicide if necessary. Avoid overhead irrigation.",
-    "Tomato Early Blight": "Use a fungicide like Mancozeb or Chlorothalonil. Rotate crops and avoid overhead irrigation.",
     "Tomato Late Blight": "Apply copper-based fungicide. Remove and destroy infected plants.",
-    "Tomato Leaf Mold": "Improve ventilation and apply fungicides like Chlorothalonil or copper-based treatments.",
-    "Tomato Septoria Leaf Spot": "Remove infected leaves and apply fungicide like mancozeb weekly.",
-    "Tomato Spider Mite Infestation": "Spray neem oil or insecticidal soap. Increase humidity to reduce mites.",
-    "Tomato Target Spot": "Use fungicide with chlorothalonil. Improve air circulation and avoid moisture on leaves.",
-    "Tomato Yellow Leaf Curl Virus": "Control whiteflies with insecticide. Remove and destroy infected plants.",
-    "Tomato Mosaic Virus": "Disinfect tools and hands. Avoid smoking near tomato plants.",
-    "Tomato Bacterial Spot": "Use copper fungicide weekly. Remove and destroy affected plants.",
-    "Tomato Leaf Curl Virus": "Control whitefly vectors and use virus-resistant seed varieties.",
     "Healthy": "Your plant is healthy! Maintain good watering practices, monitor regularly, and follow good field hygiene."
 }
 
@@ -125,6 +101,7 @@ advice_map = {
 
 def main():
     st.set_page_config(page_title="Crop Disease Detector", page_icon="🌿", layout="centered")
+    
     langs = {"English": "en", "Hindi (हिंदी)": "hi", "Tamil (தமிழ்)": "ta", "Telugu (తెలుగు)": "te"}
     lang_ui = st.selectbox("Choose Language", list(langs.keys()))
     lang_code = langs.get(lang_ui, "en")
@@ -157,11 +134,7 @@ def main():
             img = Image.open(image_file).convert("RGB")
 
     if img:
-        if not isinstance(img, Image.Image):
-            img = Image.open(img)
-
-        img = img.convert('RGB')
-
+        img = img.convert("RGB")  
         st.image(img, caption=translate_text("Uploaded Image", lang_code), use_container_width=True)
 
         transform = transforms.Compose([
@@ -169,22 +142,17 @@ def main():
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
         ])
+        
         input_tensor = transform(img).unsqueeze(0)
 
         with torch.no_grad():
             output = model(input_tensor)
             pred_class = torch.argmax(output, dim=1).item()
             class_names = list(disease_map.keys())
-            predicted_key = class_names[pred_class] if pred_class < len(class_names) else "Unknown"
-            predicted_label = disease_map.get(predicted_key, "Unknown Disease")
+            predicted_label = disease_map.get(class_names[pred_class], "Unknown Disease")
 
         st.success(translate_text(f"🩺 Predicted Disease: {predicted_label}", lang_code))
-
-        if predicted_label != "Healthy":
-            advice = advice_map.get(predicted_label, "No specific advice available.")
-            st.info(translate_text(f"Treatment Advice: {advice}", lang_code))
-        else:
-            st.info(translate_text("Your crop appears healthy. Keep practicing good field hygiene, crop rotation, and regular pest inspection.", lang_code))
+        st.info(translate_text(f"Treatment Advice: {advice_map.get(predicted_label, 'No specific advice available.')}", lang_code))
 
 if __name__ == "__main__":
     main()
