@@ -137,13 +137,16 @@ def main():
         img = img.convert("RGB")  
         st.image(img, caption=translate_text("Uploaded Image", lang_code), use_container_width=True)
 
+        img_np = np.array(img)
+        img_pil = Image.fromarray(img_np)
+
         transform = transforms.Compose([
             transforms.Resize((128, 128)),
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
         ])
-        
-        input_tensor = transform(img).unsqueeze(0)
+
+        input_tensor = transform(img_pil).unsqueeze(0)
 
         with torch.no_grad():
             output = model(input_tensor)
