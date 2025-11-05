@@ -1,7 +1,7 @@
 streamlit
 torch==2.2.1
 torchvision
-numpy
+numpy==1.26.4
 pandas
 opencv-python
 Pillow
