@@ -129,4 +129,4 @@ This project is intended for academic and educational use.
 
 ⸻
 
-Early detection of crop diseases helps farmers reduce losses and improve yield. 🌱
+Early detection of crop diseases helps farmers reduce losses and improve yield. 
