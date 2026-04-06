@@ -148,7 +148,7 @@ st.write(translate_text("Upload or capture an image of a crop leaf to detect dis
 
 @st.cache_resource
 def load_model():
-    model = CropDiseaseCNN(num_classes=15)
+    model = CropDiseaseCNN(num_classes=38)
     model.load_state_dict(torch.load("crop_disease_cnn.pth", map_location=torch.device("cpu")))
     model.eval()
     return model
@@ -176,7 +176,7 @@ if img:
     transform = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
-        transforms.Normalize([0.5], [0.5])
+        transforms.Normalize([0.5,0.5,0.5], [0.5,0.5,0.5])
     ])
     input_tensor = transform(img).unsqueeze(0)
 
