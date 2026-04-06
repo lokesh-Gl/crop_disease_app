@@ -148,7 +148,7 @@ st.write(translate_text("Upload or capture an image of a crop leaf to detect dis
 
 @st.cache_resource
 def load_model():
-    model = CropDiseaseCNN(num_classes=38)
+    model = CropDiseaseCNN(num_classes=15)
     model.load_state_dict(torch.load("crop_disease_cnn.pth", map_location=torch.device("cpu")))
     model.eval()
     return model
