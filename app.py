@@ -28,7 +28,7 @@ class CropDiseaseCNN(nn.Module):
             nn.Linear(128 * 16 * 16, 256),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(256, 15)
+            nn.Linear(256, 38)
         )
 
     def forward(self, x):
@@ -148,7 +148,7 @@ st.write(translate_text("Upload or capture an image of a crop leaf to detect dis
 
 @st.cache_resource
 def load_model():
-    model = CropDiseaseCNN(num_classes=15)
+    model = CropDiseaseCNN(num_classes=38)
     model.load_state_dict(torch.load("crop_disease_cnn.pth", map_location=torch.device("cpu")))
     model.eval()
     return model
@@ -171,22 +171,30 @@ else:
         img = Image.open(image_file).convert("RGB")
 
 if img:
-    st.image(img, caption=translate_text("Uploaded Image", lang_code), use_column_width=True)
+    st.image(img, caption=translate_text("Uploaded Image", lang_code), width="stretch")
 
     transform = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
-        transforms.Normalize([0.5], [0.5])
+        transforms.Normalize([0.5,0.5,0.5], [0.5,0.5,0.5])
     ])
     input_tensor = transform(img).unsqueeze(0)
 
     with torch.no_grad():
         output = model(input_tensor)
         pred_class = torch.argmax(output, dim=1).item()
-        class_names = list(disease_map.keys())
-        predicted_key = class_names[pred_class] if pred_class < len(class_names) else "Unknown"
-        predicted_label = disease_map.get(predicted_key, "Unknown Disease")
 
+        import json
+        with open("class_names.json") as f:
+            class_names = json.load(f)
+
+        predicted_key = class_names[pred_class]
+
+        # Fix dataset naming differences
+        predicted_key = predicted_key.replace("healthy", "Healthy")
+        predicted_key = predicted_key.replace("Pepper,_bell", "Pepper__bell")
+
+    predicted_label = disease_map.get(predicted_key, predicted_key)
     st.success(translate_text(f"🩺 Predicted Disease: {predicted_label}", lang_code))
 
     if predicted_label != "Healthy":
@@ -194,4 +202,3 @@ if img:
         st.info(translate_text(f"Treatment Advice: {advice}", lang_code))
     else:
         st.info(translate_text("Your crop appears healthy. Keep practicing good field hygiene, crop rotation, and regular pest inspection.", lang_code))
-
